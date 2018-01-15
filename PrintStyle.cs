@@ -1,8 +1,8 @@
 ﻿namespace Sudoku
 {
-	public enum PrintStyle
-	{
-		Blanks,
-		CandidateCount
-	}
+    public enum PrintStyle
+    {
+        Blanks,
+        CandidateCount
+    }
 }
