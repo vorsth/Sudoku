@@ -7,10 +7,12 @@ namespace Sudoku.Solvers
     public class HiddenSingleCellsSolver
     {
         private NakedSingleCellsSolver _nakedSingleCellsSolver;
+        private SudokuBoardPrinter _printer;
 
-        public HiddenSingleCellsSolver(NakedSingleCellsSolver nakedSingleCellsSolver)
+        public HiddenSingleCellsSolver(NakedSingleCellsSolver nakedSingleCellsSolver, SudokuBoardPrinter printer)
         {
             this._nakedSingleCellsSolver = nakedSingleCellsSolver;
+            this._printer = printer;
         }
 
         public void ProcessBoard(SudokuBoard board)
@@ -135,15 +137,15 @@ namespace Sudoku.Solvers
 			}
 			// Get all the set values in the row, column and box check if one of those values is what we're trying to set this cell to
 			if(board.GetRow(row).Contains((int)v)) {
-				board.Print(PrintStyle.CandidateCount);
+				this._printer.Print(board, PrintStyle.CandidateCount);
 				throw new Exception(String.Format("ROW Confilct at ({0},{1}) with value {2}", row, col, v));
 			}
 			if(board.GetCol(col).Contains((int)v)){
-				board.Print(PrintStyle.CandidateCount);
+				this._printer.Print(board, PrintStyle.CandidateCount);
 				throw new Exception(String.Format("COLUMN Conflict at ({0},{1}) with value {2}", row, col, v));
 			}
 			if(board.GetBox( Box.ToBoxCoordinate(row), Box.ToBoxCoordinate(col)).Contains((int)v)){
-				board.Print(PrintStyle.CandidateCount);
+				this._printer.Print(board, PrintStyle.CandidateCount);
 				throw new Exception(String.Format("BOX Conflict at ({0},{1}) with value {2}", row, col, v));
 			}
 

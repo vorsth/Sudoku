@@ -141,7 +141,7 @@ namespace Sudoku
             var nakedSingleCellsSolver = new NakedSingleCellsSolver();
 
             nakedSingleCellsSolver.ProcessBoard(this);
-            new HiddenSingleCellsSolver(nakedSingleCellsSolver).ProcessBoard(this);
+            new HiddenSingleCellsSolver(nakedSingleCellsSolver, this._printer).ProcessBoard(this);
             new PointedPairsSolver(nakedSingleCellsSolver).ProcessBoard(this);
 		}
 
