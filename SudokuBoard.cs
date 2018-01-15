@@ -132,84 +132,6 @@ namespace Sudoku
 			return CellValues;
 		}
 
-		/// <summary>
-		/// Get a list of the available values in non-locked cells in the box, but not from the given cell at (row,col)
-		/// </summary>
-		/// <param name="Bx">Box x coordinate</param>
-		/// <param name="By">Box y coordinate</param>
-		/// <param name="row">Row coordinate of cell to exclude</param>
-		/// <param name="col">Column coordinate of cell to exclude</param>
-		/// <returns></returns>
-		private List<int> GetBoxCandidateValues(int Bx, int By, int row, int col)
-		{
-			List<int> CandidateValuesInBox = new List<int>();
-			for(int i = Box.ToBoardCoordinate(Bx); i < Box.ToBoardCoordinate(Bx) + 3; i++) {
-				for(int j = Box.ToBoardCoordinate(By); j < Box.ToBoardCoordinate(By) + 3; j++){
-					// Skip any locked cells and the given cell
-					if(!this.Board[i][j].Locked && !(i == row && j == col)){
-						CandidateValuesInBox.AddRange(this.Board[i][j].CandidateValues);
-					}
-				}
-			}
-			CandidateValuesInBox = CandidateValuesInBox.Distinct().ToList();
-			CandidateValuesInBox.Sort();
-			return CandidateValuesInBox;
-		}
-
-		/// <summary>
-		/// Gets the values that are still required in this column
-		/// </summary>
-		/// <param name="col"></param>
-		/// <returns></returns>
-		private List<int> GetColumnRequiredValues(int col)
-		{
-			List<int> RequiredValues = null;
-			Cell.AllValues.CopyTo(RequiredValues.ToArray());
-			for(int r = 0; r < 9; r++) {
-				if(this.Board[r][col].Locked) {
-					RequiredValues.Remove((int)(this.Board[r][col].Value));
-				}
-			}
-			return RequiredValues;
-		}
-
-		/// <summary>
-		/// Gets the values that are still required in this row
-		/// </summary>
-		/// <param name="col"></param>
-		/// <returns></returns>
-		public List<int> GetRowRequriedValues(int row)
-		{
-			List<int> RequiredValues = null;
-			Cell.AllValues.CopyTo(RequiredValues.ToArray());
-			for(int c = 0; c < 9; c++) {
-				if(this.Board[row][c].Locked) {
-					RequiredValues.Remove((int)(this.Board[row][c].Value));
-				}
-			}
-			return RequiredValues;
-		}
-
-		/// <summary>
-		/// Gets the values that are still required in the box
-		/// </summary>
-		/// <param name="Bx"></param>
-		/// <param name="By"></param>
-		/// <returns></returns>
-		public List<int> GetBoxRequiredValues(int Bx, int By)
-		{
-			List<int> RequiredValues = null;
-			Cell.AllValues.CopyTo(RequiredValues.ToArray());
-			foreach(int r in Box.BoardCoordinates(Bx)) {
-				foreach(int c in Box.BoardCoordinates(By)) {
-					if(this.Board[r][c].Locked) {
-						RequiredValues.Remove((int)(this.Board[r][c].Value));
-					}
-				}
-			}
-			return RequiredValues;
-		}
-
 		public void Solve()
 		{
 			this.SolveAttempts++;
@@ -218,6 +140,31 @@ namespace Sudoku
             nakedSingleCellsSolver.ProcessBoard(this);
             new HiddenSingleCellsSolver(nakedSingleCellsSolver).ProcessBoard(this);
             new PointedPairsSolver(nakedSingleCellsSolver).ProcessBoard(this);
+		}
+
+
+		/// <summary>
+		/// Clears a value fromt the box when given a row pointed pair
+		/// </summary>
+		/// <param name="Value"></param>
+		/// <param name="Br"></param>
+		/// <param name="Bc"></param>
+		/// <param name="row"></param>
+		public void RowPointedPairClearBox(int Value, int Br, int Bc, int row)
+		{
+			#if DEBUG
+			Console.WriteLine(String.Format("ROW Pointed Pair on {0} in box ({1},{2})", Value, Br, Bc));
+			#endif
+			for(int r = Box.ToBoardCoordinate(Br); r < Box.ToBoardCoordinate(Br) + 3; r++) {
+				for(int c = Box.ToBoardCoordinate(Bc); c < Box.ToBoardCoordinate(Bc) + 3; c++) {
+					if(r != row) {
+						#if DEBUG
+						Console.WriteLine(String.Format("CLEAR {0} from ({1},{2})", Value, r, c));
+						#endif
+						this.Board[r][c].RemoveCandidate(Value);
+					}
+				}
+			}
 		}
 
 		public void LockCell(Cell cell, int row, int col, int v = 0)
