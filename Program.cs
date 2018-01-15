@@ -34,7 +34,8 @@ namespace Sudoku
 			//}
 			//);
 
-			BoardReader BR = new BoardReader("../../Puzzles.txt");
+            var printer = new SudokuBoardPrinter();
+			var BR = new SudokuBoardReader("../../Puzzles.txt", printer);
 
 			int SolvedBoards = 0;
 
@@ -42,9 +43,9 @@ namespace Sudoku
 			//List<SudokuBoard> BoardsToRun = new List<SudokuBoard>() { BR.Boards[49] };
 
 			foreach(SudokuBoard B in BoardsToRun) {
-				#if DEBUG
-				B.Print();
-				B.PrintUploadString();
+                #if DEBUG
+                printer.Print(B);
+                printer.PrintUploadString(B);
 				#endif
 
 				int LastHash = 0;
@@ -53,7 +54,7 @@ namespace Sudoku
 					B.Solve();
 					#if DEBUG
 					Console.WriteLine(String.Format("Attempt: {0} - {1} solved cells", B.SolveAttempts, B.SolvedCells));
-					B.Print(PrintStyle.CandidateCount);
+                    printer.Print(B, PrintStyle.CandidateCount);
 					#endif
 				}
 
@@ -62,16 +63,13 @@ namespace Sudoku
 					SolvedBoards += 1;
 				} else {
 					Console.WriteLine(String.Format("{0} Not Solved", B.Name));
-					B.Print(PrintStyle.Blanks);
-					B.PrintDetails();
+                    printer.Print(B, PrintStyle.Blanks);
+                    printer.PrintDetails(B);
 				}
 			}
 
 			Console.WriteLine(String.Format("Solved {0} boards", SolvedBoards));
 			Console.ReadLine();
-
-
-
 		}
 	}
 }

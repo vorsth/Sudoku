@@ -52,7 +52,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BlockScope.cs" />
-    <Compile Include="BoardReader.cs" />
+    <Compile Include="SudokuBoardPrinter.cs" />
+    <Compile Include="SudokuBoardReader.cs" />
     <Compile Include="Box.cs" />
     <Compile Include="PrintStyle.cs" />
     <Compile Include="Solvers\HiddenSingleCellsSolver.cs" />

@@ -5,15 +5,17 @@ using System.Linq;
 
 namespace Sudoku
 {
-	class BoardReader
+	class SudokuBoardReader
 	{
-		private string FileName { get; set; }
+        private string FileName;
+        private SudokuBoardPrinter _printer;
 
 		public List<SudokuBoard> Boards { get; private set; }
 
-		public BoardReader(string file)
+		public SudokuBoardReader(string file, SudokuBoardPrinter printer)
 		{
 			this.FileName = file;
+            this._printer = printer;
 			this.Boards = new List<SudokuBoard>();
 
 			List<string> Lines = File.ReadAllLines(file).ToList();
@@ -31,7 +33,7 @@ namespace Sudoku
 			for(int i = 1; i < 10; i++) {
 				Board.Add(ReadGridLine(Lines[i]));
 			}
-			this.Boards.Add(new SudokuBoard(Board, Name));
+			this.Boards.Add(new SudokuBoard(Board, this._printer, Name));
 		}
 
 		private List<int> ReadGridLine(string GridLine)
