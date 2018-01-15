@@ -55,6 +55,9 @@
     <Compile Include="BoardReader.cs" />
     <Compile Include="Box.cs" />
     <Compile Include="PrintStyle.cs" />
+    <Compile Include="Solvers\HiddenSingleCellsSolver.cs" />
+    <Compile Include="Solvers\NakedSingleCellsSolver.cs" />
+    <Compile Include="Solvers\PointedPairsSolver.cs" />
     <Compile Include="SudokuBoard.cs" />
     <Compile Include="Cell.cs" />
     <Compile Include="Program.cs" />

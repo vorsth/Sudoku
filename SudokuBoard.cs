@@ -1,10 +1,11 @@
-﻿using System;
+﻿using Sudoku.Solvers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Sudoku
 {
-	class SudokuBoard
+	public class SudokuBoard
 	{
 		public string Name { get; private set; }
 		public List<List<Cell>> Board;
@@ -95,7 +96,7 @@ namespace Sudoku
 		/// </summary>
 		/// <param name="r">Row to look at</param>
 		/// <returns></returns>
-		private List<int?> GetRow(int r)
+		public List<int?> GetRow(int r)
 		{
 			return this.Board[r].Select(x => x.Value).ToList();
 		}
@@ -105,7 +106,7 @@ namespace Sudoku
 		/// </summary>
 		/// <param name="c">Column to look at</param>
 		/// <returns></returns>
-		private List<int?> GetCol(int c)
+		public List<int?> GetCol(int c)
 		{
 			List<int?> CellValues = new List<int?>();
 			foreach(List<Cell> row in this.Board) {
@@ -120,7 +121,7 @@ namespace Sudoku
 		/// <param name="Bx">Box coordinate x (0-2)</param>
 		/// <param name="By">Box coordinate y (0-2)</param>
 		/// <returns></returns>
-		private List<int?> GetBox(int Bx, int By)
+		public List<int?> GetBox(int Bx, int By)
 		{
 			List<int?> CellValues = new List<int?>();
 			for(int i = Box.ToBoardCoordinate(Bx); i < Box.ToBoardCoordinate(Bx)+3; i++) {
@@ -153,58 +154,6 @@ namespace Sudoku
 			CandidateValuesInBox = CandidateValuesInBox.Distinct().ToList();
 			CandidateValuesInBox.Sort();
 			return CandidateValuesInBox;
-		}
-
-		/// <summary>
-		/// Get a list of the available values in non-locked cells in the row, but not from the given cell at (row,col)
-		/// </summary>
-		/// <param name="row">Row coordinate of cell to exclude (also the row to get values from)</param>
-		/// <param name="col">Column coordinate of cell to exclude</param>
-		/// <returns></returns>
-		private List<int> GetRowCandidateValues(int row, int col, BlockScope Scope = BlockScope.FullBlock)
-		{
-			List<int> CandidateValuesInRow = new List<int>();
-			int BoardBoxMin = Box.ToBoardCoordinate(Box.ToBoxCoordinate(col));
-			int BoardBoxMax = Box.ToBoardCoordinate(Box.ToBoxCoordinate(col))+2;
-
-			for(int c = 0; c < 9; c++) {
-				if(c != col && !this.Board[row][c].Locked) {
-					if( (Scope.HasFlag(BlockScope.InsideBlock) && (c >= BoardBoxMin && c <= BoardBoxMax)) || // If we want inside the block, and this column is inside
-						(Scope.HasFlag(BlockScope.OutsideBlock) && (c < BoardBoxMin || c >BoardBoxMax))      // If we want outside the block, and this column is outside
-					) {
-						CandidateValuesInRow.AddRange(this.Board[row][c].CandidateValues);
-					}
-				}
-			}
-			CandidateValuesInRow = CandidateValuesInRow.Distinct().ToList();
-			CandidateValuesInRow.Sort();
-			return CandidateValuesInRow;
-		}
-
-		/// <summary>
-		/// Get a list of the available values in non-locked cells in the column, but not from the given cell at (row,col)
-		/// </summary>
-		/// <param name="row">Row coordinate of cell to exclude (also the row to get values from)</param>
-		/// <param name="col">Column coordinate of cell to exclude</param>
-		/// <returns></returns>
-		private List<int> GetColumnCandidateValues(int row, int col, BlockScope Scope = BlockScope.FullBlock)
-		{
-			List<int> CandidateValuesInColumn = new List<int>();
-			int BoardBoxMin = Box.ToBoardCoordinate(Box.ToBoxCoordinate(row));
-			int BoardBoxMax = Box.ToBoardCoordinate(Box.ToBoxCoordinate(row))+2;
-
-			for(int r = 0; r < 9; r++) {
-				if(r != row && !this.Board[r][col].Locked) {
-					if( (Scope.HasFlag(BlockScope.InsideBlock) && (r >= BoardBoxMin && r <= BoardBoxMax)) || // If we want inside the block, and this column is inside
-						(Scope.HasFlag(BlockScope.OutsideBlock) && (r < BoardBoxMin || r > BoardBoxMax))     // If we want outside the block, and this column is outside
-					) {
-						CandidateValuesInColumn.AddRange(this.Board[r][col].CandidateValues);
-					}
-				}
-			}
-			CandidateValuesInColumn = CandidateValuesInColumn.Distinct().ToList();
-			CandidateValuesInColumn.Sort();
-			return CandidateValuesInColumn;
 		}
 
 		/// <summary>
@@ -264,146 +213,14 @@ namespace Sudoku
 		public void Solve()
 		{
 			this.SolveAttempts++;
-			FindNakedSingleCells();
-			FindHiddenSingleCells();
-			FindPointedPairs();
+            var nakedSingleCellsSolver = new NakedSingleCellsSolver();
+
+            nakedSingleCellsSolver.ProcessBoard(this);
+            new HiddenSingleCellsSolver(nakedSingleCellsSolver).ProcessBoard(this);
+            new PointedPairsSolver(nakedSingleCellsSolver).ProcessBoard(this);
 		}
 
-		/// <summary>
-		/// Find available numbers in each cell. If, when removing available numbers, there is only one left, that now becomes the "locked" value
-		/// </summary>
-		public void FindNakedSingleCells()
-		{
-			int HashCode = -1;
-			while(HashCode != this.GetHashCode()) {
-				HashCode = this.GetHashCode();
-				for(int row = 0; row < 9; row++) {
-					for(int col = 0; col < 9; col++) {
-						if(!this.Board[row][col].Locked) {
-							List<int?> NonValidValues = new List<int?>();
-							NonValidValues.AddRange(this.GetRow(row));
-							NonValidValues.AddRange(this.GetCol(col));
-							NonValidValues.AddRange(this.GetBox(Box.ToBoxCoordinate(row), Box.ToBoxCoordinate(col)));
-							NonValidValues = NonValidValues.Distinct().ToList();
-							NonValidValues.Sort();
-							this.Board[row][col].RemoveCandidates(NonValidValues);
-						}
-					}
-				}
-			}
-		}
-
-		/// <summary>
-		/// 
-		/// </summary>
-		public void FindHiddenSingleCells()
-		{
-			for(int row = 0; row < 9; row++) {
-				for(int col = 0; col < 9; col++) {
-					FindNakedSingleCells();
-					Cell c = this.Board[row][col];
-					if(!c.Locked) {
-						List<int> CandidateInBox = GetBoxCandidateValues(Box.ToBoxCoordinate(row), Box.ToBoxCoordinate(col), row, col);
-						List<int> CandidateInRow = GetRowCandidateValues(row, col);
-						List<int> CandidateInCol = GetColumnCandidateValues(row, col);
-
-						foreach(int v in c.CandidateValues) {
-							// Find if the value v is available in other cells in the box
-							if(!CandidateInBox.Contains(v)) {
-								this.LockCell(c,row,col,v);
-								break;
-							}
-							if(!CandidateInRow.Contains(v)) {
-								this.LockCell(c,row,col,v);
-								break;
-							}
-							if(!CandidateInCol.Contains(v)) {
-								this.LockCell(c,row,col,v);
-								break;
-							}
-						}
-					}
-				}
-			}
-		}
-
-		public void FindPointedPairs()
-		{
-			for(int row = 0; row < 9; row++) {
-				for(int col = 0; col < 9; col++) {
-					Cell cell = this.Board[row][col];
-					int Br = Box.ToBoxCoordinate(row);
-					int Bc = Box.ToBoxCoordinate(col);
-					if(!cell.Locked) {
-						foreach(int v in cell.CandidateValues) {
-							// Look in row of this box for the same candidate
-							List<int> BoxCandidateValues = GetRowCandidateValues(row,col,BlockScope.InsideBlock);
-							List<int> RowCandidateValues = GetRowCandidateValues(row,col,BlockScope.OutsideBlock);
-							if(BoxCandidateValues.Contains(v) && !RowCandidateValues.Contains(v)){
-								RowPointedPairClearBox(v, Br, Bc, row);
-							}
-
-							// Look in column of this box for the same candidate
-							BoxCandidateValues = GetColumnCandidateValues(row, col,BlockScope.InsideBlock);
-							List<int> ColumnCandidateValues = GetColumnCandidateValues(row, col, BlockScope.OutsideBlock);
-							if(BoxCandidateValues.Contains(v) && !ColumnCandidateValues.Contains(v)) {
-								ColumnPointedPairClearBox(v, Br, Bc, col);
-							}
-						}
-						FindNakedSingleCells();
-					}
-				}
-			}
-		}
-
-		/// <summary>
-		/// Clears a value fromt the box when given a row pointed pair
-		/// </summary>
-		/// <param name="Value"></param>
-		/// <param name="Br"></param>
-		/// <param name="Bc"></param>
-		/// <param name="row"></param>
-		public void RowPointedPairClearBox(int Value, int Br, int Bc, int row)
-		{
-			#if DEBUG
-			Console.WriteLine(String.Format("ROW Pointed Pair on {0} in box ({1},{2})", Value, Br, Bc));
-			#endif
-			for(int r = Box.ToBoardCoordinate(Br); r < Box.ToBoardCoordinate(Br) + 3; r++) {
-				for(int c = Box.ToBoardCoordinate(Bc); c < Box.ToBoardCoordinate(Bc) + 3; c++) {
-					if(r != row) {
-						#if DEBUG
-						Console.WriteLine(String.Format("CLEAR {0} from ({1},{2})", Value, r, c));
-						#endif
-						this.Board[r][c].RemoveCandidate(Value);
-					}
-				}
-			}
-		}
-
-		/// <summary>
-		/// Clears a value from a box when given a column pointed pair
-		/// </summary>
-		/// <param name="Value">Value to clear in the box</param>
-		/// <param name="Br">Box column index</param>
-		/// <param name="Bc">Box row index</param>
-		/// <param name="col">Column that the pointed pair is in, don't clear the value from this column</param>
-		public void ColumnPointedPairClearBox(int Value, int Br, int Bc, int col){
-			#if DEBUG
-			Console.WriteLine(String.Format("COLUMN Pointed Pair on {0} in box({1},{2})",Value, Br, Bc));
-			#endif
-			for(int r = Box.ToBoardCoordinate(Br); r < Box.ToBoardCoordinate(Br) + 3; r++) {
-				for(int c = Box.ToBoardCoordinate(Bc); c < Box.ToBoardCoordinate(Bc) + 3; c++) {
-					if(c != col) {
-						#if DEBUG
-						Console.WriteLine(String.Format("CLEAR {0} from ({1},{2})", Value, r, c));
-						#endif
-						this.Board[r][c].RemoveCandidate(Value);
-					}
-				}
-			}
-		}
-
-		private void LockCell(Cell cell, int row, int col, int v = 0)
+		public void LockCell(Cell cell, int row, int col, int v = 0)
 		{
 			if(v == 0) {
 				LockCell(cell, row, col, cell.CandidateValues[0]);
@@ -440,6 +257,11 @@ namespace Sudoku
 			}
 		}
 
+        /// <summary>
+        /// The hash code is used to determine the current state of the board, often for the purposes to see
+        /// if anything has changed since a previous solving iteration
+        /// </summary>
+        /// <returns></returns>
 		public override int GetHashCode()
 		{
 			int hash = 13;

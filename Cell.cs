@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Sudoku
 {
-	class Cell
+	public class Cell
 	{
 		public List<int> CandidateValues { get; set; }
 		public int? Value { get; set; }

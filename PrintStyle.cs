@@ -1,6 +1,6 @@
 ﻿namespace Sudoku
 {
-	enum PrintStyle
+	public enum PrintStyle
 	{
 		Blanks,
 		CandidateCount
