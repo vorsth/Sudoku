@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using Sudoku.Solvers;
 
 namespace Sudoku
 {
@@ -12,34 +14,43 @@ namespace Sudoku
 
             int SolvedBoards = 0;
 
+            var strategies = GetStrategies(printer);
+
             foreach(SudokuBoard B in BoardsToRun) {
+                var solver = new SudokuBoardSolver(B, strategies, printer);
                 #if DEBUG
-                printer.Print(B);
-                printer.PrintUploadString(B);
+                printer.Print(solver.Board);
+                printer.PrintUploadString(solver.Board);
                 #endif
 
-                int LastHash = 0;
-                while(!B.IsSolved() && B.GetHashCode() != LastHash) {
-                    LastHash = B.GetHashCode();
-                    B.Solve();
-                    #if DEBUG
-                    Console.WriteLine(String.Format("Attempt: {0} - {1} solved cells", B.SolveAttempts, B.SolvedCells));
-                    printer.Print(B, PrintStyle.CandidateCount);
-                    #endif
-                }
+                solver.Solve();
 
-                if(B.IsSolved()) {
-                    Console.WriteLine(String.Format("{0} Solved: {1} iterations", B.Name, B.SolveAttempts));
+                if(solver.IsBoardSolved) {
+                    Console.WriteLine(String.Format("{0} Solved: {1} iterations", solver.Board.Name, solver.SolveAttempts));
                     SolvedBoards += 1;
                 } else {
-                    Console.WriteLine(String.Format("{0} Not Solved", B.Name));
-                    printer.Print(B, PrintStyle.Blanks);
-                    printer.PrintDetails(B);
+                    Console.WriteLine(String.Format("{0} Not Solved", solver.Board.Name));
+                    printer.Print(solver.Board, PrintStyle.Blanks);
+                    printer.PrintDetails(solver.Board);
                 }
             }
 
             Console.WriteLine(String.Format("Solved {0} boards", SolvedBoards));
             Console.ReadLine();
+        }
+
+        private static List<ISolver> GetStrategies(SudokuBoardPrinter printer)
+        {
+            var nakedSingleCellsSolver = new NakedSingleCellsSolver();
+            var hiddenSingleCellsSolver = new HiddenSingleCellsSolver(nakedSingleCellsSolver, printer);
+            var pointedPairsSolver = new PointedPairsSolver(nakedSingleCellsSolver);
+
+            return new List<ISolver>()
+            {
+                nakedSingleCellsSolver,
+                hiddenSingleCellsSolver,
+                pointedPairsSolver
+            };
         }
     }
 }

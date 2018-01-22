@@ -6,7 +6,7 @@ namespace Sudoku.Solvers
     /// <summary>
     /// Find available numbers in each cell. If, when removing available numbers, there is only one left, that now becomes the "locked" value
     /// </summary>
-    public class NakedSingleCellsSolver
+    public class NakedSingleCellsSolver : ISolver
     {
         public void ProcessBoard(SudokuBoard board)
         {

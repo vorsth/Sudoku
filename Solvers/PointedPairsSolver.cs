@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Sudoku.Solvers
 {
-    public class PointedPairsSolver
+    public class PointedPairsSolver : ISolver
     {
         private NakedSingleCellsSolver _nakedSingleCellsSolver;
 

@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Sudoku.Solvers
 {
-    public class HiddenSingleCellsSolver
+    public class HiddenSingleCellsSolver : ISolver
     {
         private NakedSingleCellsSolver _nakedSingleCellsSolver;
         private SudokuBoardPrinter _printer;

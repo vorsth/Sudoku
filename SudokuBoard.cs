@@ -11,7 +11,7 @@ namespace Sudoku
 
         public string Name { get; private set; }
         public List<List<Cell>> Board;
-        public int SolveAttempts { get; set; }
+
         public int SolvedCells
         {
             get
@@ -33,7 +33,6 @@ namespace Sudoku
             this._printer = printer;
             this.Name = name;
             this.Board = new List<List<Cell>>();
-            this.SolveAttempts = 0;
 
             if(b.Count != 9) {
                 throw new Exception("Row count off");
@@ -134,17 +133,6 @@ namespace Sudoku
             }
             return CellValues;
         }
-
-        public void Solve()
-        {
-            this.SolveAttempts++;
-            var nakedSingleCellsSolver = new NakedSingleCellsSolver();
-
-            nakedSingleCellsSolver.ProcessBoard(this);
-            new HiddenSingleCellsSolver(nakedSingleCellsSolver, this._printer).ProcessBoard(this);
-            new PointedPairsSolver(nakedSingleCellsSolver).ProcessBoard(this);
-        }
-
 
         /// <summary>
         /// Clears a value fromt the box when given a row pointed pair
