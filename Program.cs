@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace Sudoku
 {
@@ -7,40 +6,11 @@ namespace Sudoku
     {
         static void Main(string[] args)
         {
-            //Easy 1
-            //SudokuBoard B = new SudokuBoard(new List<List<int>>(){
-            //    new List<int>(){0,9,0,2,0,7,0,4,0},
-            //    new List<int>(){3,0,0,5,0,8,0,0,6},
-            //    new List<int>(){0,0,8,0,4,0,2,0,0},
-            //    new List<int>(){1,4,0,0,0,0,0,8,3},
-            //    new List<int>(){0,0,6,0,0,0,4,0,0},
-            //    new List<int>(){2,7,0,0,0,0,0,9,1},
-            //    new List<int>(){0,0,3,0,6,0,9,0,0},
-            //    new List<int>(){4,0,0,3,0,9,0,0,7},
-            //    new List<int>(){0,6,0,8,0,5,0,1,0}}
-            //);
-
-            // Easy 2
-            //SudokuBoard B = new SudokuBoard(new List<List<int>>(){
-            //    new List<int>(){0,0,0,4,0,1,9,0,0},
-            //    new List<int>(){0,0,0,5,7,0,0,0,0},
-            //    new List<int>(){7,0,1,0,0,0,6,0,0},
-            //    new List<int>(){2,0,0,0,8,0,0,9,6},
-            //    new List<int>(){0,7,0,1,0,4,0,8,0},
-            //    new List<int>(){1,8,0,0,5,0,0,0,7},
-            //    new List<int>(){0,0,4,0,0,0,2,0,3},
-            //    new List<int>(){0,0,0,0,2,5,0,0,0},
-            //    new List<int>(){0,0,7,9,0,6,0,0,0}
-            //}
-            //);
-
             var printer = new SudokuBoardPrinter();
             var BR = new SudokuBoardReader("../../Puzzles.txt", printer);
+            var BoardsToRun = BR.Boards;
 
             int SolvedBoards = 0;
-
-            List<SudokuBoard> BoardsToRun = BR.Boards;
-            //List<SudokuBoard> BoardsToRun = new List<SudokuBoard>() { BR.Boards[49] };
 
             foreach(SudokuBoard B in BoardsToRun) {
                 #if DEBUG
