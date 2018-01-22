@@ -9,7 +9,7 @@ namespace Sudoku
         static void Main(string[] args)
         {
             var printer = new SudokuBoardPrinter();
-            var BR = new SudokuBoardReader("../../Puzzles.txt", printer);
+            var BR = new SudokuBoardReader("Puzzles.txt", printer);
             var BoardsToRun = BR.Boards;
 
             int SolvedBoards = 0;
