@@ -134,30 +134,6 @@ namespace Sudoku
             return CellValues;
         }
 
-        /// <summary>
-        /// Clears a value fromt the box when given a row pointed pair
-        /// </summary>
-        /// <param name="Value"></param>
-        /// <param name="Br"></param>
-        /// <param name="Bc"></param>
-        /// <param name="row"></param>
-        public void RowPointedPairClearBox(int Value, int Br, int Bc, int row)
-        {
-            #if DEBUG
-            Console.WriteLine(String.Format("ROW Pointed Pair on {0} in box ({1},{2})", Value, Br, Bc));
-            #endif
-            for(int r = Box.ToBoardCoordinate(Br); r < Box.ToBoardCoordinate(Br) + 3; r++) {
-                for(int c = Box.ToBoardCoordinate(Bc); c < Box.ToBoardCoordinate(Bc) + 3; c++) {
-                    if(r != row) {
-                        #if DEBUG
-                        Console.WriteLine(String.Format("CLEAR {0} from ({1},{2})", Value, r, c));
-                        #endif
-                        this.Board[r][c].RemoveCandidate(Value);
-                    }
-                }
-            }
-        }
-
         public void LockCell(Cell cell, int row, int col, int v = 0)
         {
             if(v == 0) {
